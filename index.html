@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Despachos</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .contenedor {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 25px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #resultado {
+            margin-top: 20px;
+            padding: 15px;
+            background: #eeeeee;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="contenedor">
+
+    <h1>Control de Despachos</h1>
+
+    <form id="formDespacho">
+
+        <label>Solicitante</label>
+        <input type="text" id="solicitante" required>
+
+        <label>Correo</label>
+        <input type="email" id="correo" required>
+
+        <label>Código del producto</label>
+        <input type="text" id="codigo_producto"
+               placeholder="Ej: INS-0101" required>
+
+        <label>Cantidad</label>
+        <input type="number" id="cantidad" min="1" required>
+
+        <label>Destino</label>
+        <input type="text" id="destino" required>
+
+        <label>Motivo</label>
+
+        <select id="motivo">
+            <option value="despacho">Despacho</option>
+            <option value="traslado entre sedes">
+                Traslado entre sedes
+            </option>
+            <option value="avería">Avería</option>
+        </select>
+
+        <button type="submit">
+            Registrar despacho
+        </button>
+
+    </form>
+
+    <div id="resultado">
+        Esperando registro...
+    </div>
+
+</div>
+
+<script>
+
+    // PEGA ENTRE LAS COMILLAS LA URL DE TU WEBHOOK DE MAKE
+    const WEBHOOK_URL = "https://hook.us2.make.com/vaogkdcfcvwrj6oq1hvvql6w1zj9kdrl";
+
+    document.getElementById("formDespacho")
+        .addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        const datos = {
+            solicitante:
+                document.getElementById("solicitante").value,
+
+            correo:
+                document.getElementById("correo").value,
+
+            codigo_producto:
+                document.getElementById("codigo_producto").value,
+
+            cantidad:
+                Number(document.getElementById("cantidad").value),
+
+            destino:
+                document.getElementById("destino").value,
+
+            motivo:
+                document.getElementById("motivo").value
+        };
+
+        document.getElementById("resultado").innerHTML =
+            "Procesando despacho...";
+
+        try {
+
+            const respuesta = await fetch(WEBHOOK_URL, {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify(datos)
+            });
+
+            const texto = await respuesta.text();
+
+            document.getElementById("resultado").innerHTML =
+                "<strong>Respuesta de Make:</strong><br>" + texto;
+
+        } catch (error) {
+
+            document.getElementById("resultado").innerHTML =
+                "Error al conectar con Make: " + error.message;
+        }
+
+    });
+
+</script>
+
+</body>
+</html>
